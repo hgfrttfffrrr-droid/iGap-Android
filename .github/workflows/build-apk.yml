@@ -19,10 +19,17 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
+    # مرحله جدید: تغییر مخازن برای پیدا کردن کتابخانه‌های قدیمی
+    - name: Fix Repositories in build.gradle
+      run: |
+        # اضافه کردن mavenCentral و google به مخازن اصلی
+        sed -i 's/jcenter()/mavenCentral()\n        google()\n        maven { url "https:\/\/jitpack.io" }/g' build.gradle
+        # اگر پلاگین bintray مشکل داشت، از مخزن جایگزین استفاده کنه
+        sed -i 's|maven { url "https://plugins.gradle.org/m2/" }|maven { url "https://plugins.gradle.org/m2/" }\n        maven { url "https://maven.google.com" }|g' build.gradle
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # مرحله تزریق API ID فیک تا اپ موقع بیلد ارور نده
     - name: Inject API ID
       run: |
         echo "APP_API_ID=12345" >> gradle.properties
