@@ -19,13 +19,16 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    # مرحله جدید: تغییر مخازن برای پیدا کردن کتابخانه‌های قدیمی
-    - name: Fix Repositories in build.gradle
+    # مرحله جدید: حذف کامل پلاگین‌های bintray و realm از فایل‌های Gradle
+    - name: Remove Deprecated Plugins from Gradle Files
       run: |
-        # اضافه کردن mavenCentral و google به مخازن اصلی
-        sed -i 's/jcenter()/mavenCentral()\n        google()\n        maven { url "https:\/\/jitpack.io" }/g' build.gradle
-        # اگر پلاگین bintray مشکل داشت، از مخزن جایگزین استفاده کنه
-        sed -i 's|maven { url "https://plugins.gradle.org/m2/" }|maven { url "https://plugins.gradle.org/m2/" }\n        maven { url "https://maven.google.com" }|g' build.gradle
+        # حذف پلاگین bintray از فایل build.gradle اصلی
+        sed -i '/com.jfrog.bintray.gradle:gradle-bintray-plugin/d' build.gradle
+        # حذف پلاگین realm از فایل build.gradle اصلی
+        sed -i '/io.realm:realm-gradle-plugin/d' build.gradle
+        # حذف خطوط مربوط به bintray در صورت وجود در فایل‌های دیگر
+        grep -rl "bintray" . --include="*.gradle" | xargs sed -i '/bintray/d' 2>/dev/null || true
+        grep -rl "realm-gradle-plugin" . --include="*.gradle" | xargs sed -i '/realm-gradle-plugin/d' 2>/dev/null || true
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
